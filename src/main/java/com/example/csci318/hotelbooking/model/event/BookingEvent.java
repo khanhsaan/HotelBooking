@@ -10,6 +10,8 @@ public class BookingEvent {
     @Id
     @GeneratedValue
     private long id;
+
     @Column
     private String eventName;
+
 }
