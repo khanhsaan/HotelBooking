@@ -13,5 +13,4 @@ public class BookingEvent {
 
     @Column
     private String eventName;
-
 }
