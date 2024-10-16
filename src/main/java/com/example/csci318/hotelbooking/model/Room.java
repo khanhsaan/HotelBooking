@@ -1,26 +1,29 @@
 package com.example.csci318.hotelbooking.model;
 
+import com.example.csci318.hotelbooking.model.event.RoomEvent;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
+import org.springframework.data.domain.AbstractAggregateRoot;
+
 import java.util.Objects;
 
 @Entity
-public class Room {
-
+public class Room extends AbstractAggregateRoot<Room> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String roomNumber;
     private String type;
     private double price;
     private boolean availability;
+//    private String hotelName;
 
     @ManyToOne
 //    @JoinColumn(name = "hotel_id", nullable = false)
     @JsonBackReference  // This prevents the infinite recursion
     private Hotel hotel;
+
 
     // Constructors, Getters, and Setters
 
@@ -109,25 +112,43 @@ public class Room {
         return Objects.hash(id, roomNumber, type, price, availability, hotel);
     }
 
-    @Override
-//    public String toString() {
-//        return "Room{" +
-//                "roomID=" + id +
-//                ", roomNumber='" + roomNumber + '\'' +
-//                ", type='" + type + '\'' +
-//                ", price=" + price +
-//                ", availability=" + availability +
-//                ", hotel=" + hotel.getName() +  // Avoid printing the entire hotel object to prevent recursion
-//                '}';
-//    }
+    public void isBooked(String userName){
+        RoomEvent roomEvent = new RoomEvent();
+        roomEvent.setAvailability(false);
+        roomEvent.setRoomNumber(this.getRoomNumber());
+        roomEvent.setType(this.getType());
+        roomEvent.setPrice(this.getPrice());
+        roomEvent.setEventName("This room has been booked by: " + userName);
 
+        System.out.println(roomEvent.toString());
+
+        registerEvent(roomEvent);
+    }
+
+    public void isReleased(){
+        RoomEvent roomEvent = new RoomEvent();
+        roomEvent.setAvailability(true);
+        roomEvent.setRoomNumber(this.getRoomNumber());
+        roomEvent.setType(this.getType());
+        roomEvent.setPrice(this.getPrice());
+        roomEvent.setEventName("This room has been released");
+
+        registerEvent(roomEvent);
+    }
+
+    public void locatedAt(Hotel hotel){
+        this.hotel = hotel;
+    }
+
+    @Override
     public String toString() {
         return "Room{" +
                 "roomID=" + id +
                 ", roomNumber='" + roomNumber + '\'' +
                 ", type='" + type + '\'' +
                 ", price=" + price +
-                ", availability=" + availability +
+                ", availability=" + availability + '\'' +
+                ", located_at=" + this.hotel.getName() +
                 '}';
     }
 }

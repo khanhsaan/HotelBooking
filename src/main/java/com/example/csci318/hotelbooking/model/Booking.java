@@ -1,5 +1,6 @@
 package com.example.csci318.hotelbooking.model;
 
+//import com.example.csci318.hotelbooking.model.event.BookingEvent;
 import com.example.csci318.hotelbooking.model.event.BookingEvent;
 import jakarta.persistence.*;
 import org.springframework.data.domain.AbstractAggregateRoot;
@@ -15,11 +16,14 @@ public class Booking extends AbstractAggregateRoot<Booking> {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private Users user;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
+
+    public Booking() {
+    }
 
     @ManyToOne
     @JoinColumn(name = "room_id")
@@ -37,11 +41,11 @@ public class Booking extends AbstractAggregateRoot<Booking> {
         this.id = id;
     }
 
-    public User getUser() {
+    public Users getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(Users user) {
         this.user = user;
     }
 
@@ -107,5 +111,18 @@ public class Booking extends AbstractAggregateRoot<Booking> {
     @Override
     public int hashCode() {
         return Objects.hash(id, user, hotel, room, checkInDate, checkOutDate);
+    }
+
+    public void makeBooking(String userName, String hotelName, String roomNumber){
+        BookingEvent bookingEvent = new BookingEvent();
+        bookingEvent.setEventName(String.format("%s has booked room %s at hotel %s", userName, roomNumber, hotelName));
+        bookingEvent.setRoomNumber(roomNumber);
+        bookingEvent.setCheckInDate(this.getCheckInDate());
+        bookingEvent.setHotelName(hotelName);
+        bookingEvent.setUserName(userName);
+        bookingEvent.setCheckOutDate(this.getCheckOutDate());
+        System.out.println(bookingEvent.toString());
+
+        registerEvent(bookingEvent);
     }
 }
